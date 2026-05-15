@@ -1,0 +1,68 @@
+[
+  {
+    "id": "9a94d874-ac45-4601-bd0b-b9af9c9d4786",
+    "name": "50% Off High Cap Scan",
+    "description": "Current price at or below half of fetched all-time high with large market cap.",
+    "watchlist_text": "NSE|RELIANCE-EQ|2885|Reliance Industries|Energy|1945000\nNSE|HDFCBANK-EQ|1333|HDFC Bank|Financials|1250000\nNSE|INFY-EQ|1594|Infosys|Technology|675000\nNSE|ICICIBANK-EQ|4963|ICICI Bank|Financials|930000",
+    "benchmark_text": "NSE|NIFTY50|99926000|NIFTY 50|Index|0",
+    "filters": [
+      {
+        "field": "analysis_score",
+        "operator": "gte",
+        "value": 8.0,
+        "min_value": null,
+        "max_value": null,
+        "compare_field": null
+      },
+      {
+        "field": "rsi_14",
+        "operator": "between",
+        "value": null,
+        "min_value": 35.0,
+        "max_value": 75.0,
+        "compare_field": null
+      }
+    ],
+    "formula": "Current price <= 0.50 * High price all time AND Market Capitalization > 5000",
+    "sort": {
+      "field": "analysis_score",
+      "direction": "desc"
+    },
+    "limit": 20,
+    "created_at": "2026-03-19T17:07:37.716398",
+    "updated_at": "2026-03-19T17:07:37.716398"
+  },
+  {
+    "id": "3a04363f-b988-4f4d-a146-4de449aaa5f8",
+    "name": "50% Off High Cap Scan",
+    "description": "Current price at or below half of fetched all-time high with large market cap.",
+    "watchlist_text": "NSE|NIFTY50|99926000|NIFTY 50|Index|0\nNSE|NIFTYBANK|99926009|NIFTY BANK|Sector Index|0\nNSE|FINNIFTY|99926037|NIFTY FIN SERVICE|Sector Index|0\nNSE|NIFTYIT|99926012|NIFTY IT|Sector Index|0\nNSE|NIFTYFMCG|99926013|NIFTY FMCG|Sector Index|0\nNSE|NIFTYAUTO|99926011|NIFTY AUTO|Sector Index|0\nNSE|NIFTYPHARMA|99926015|NIFTY PHARMA|Sector Index|0\nNSE|Nifty50 PR 1x Inv|99926042|NIFTY50 PR 1X INV|AMXIDX|0",
+    "benchmark_text": "NSE|NIFTY50|99926000|NIFTY 50|Index|0",
+    "filters": [
+      {
+        "field": "analysis_score",
+        "operator": "gte",
+        "value": 8.0,
+        "min_value": null,
+        "max_value": null,
+        "compare_field": null
+      },
+      {
+        "field": "market_cap",
+        "operator": "between",
+        "value": null,
+        "min_value": 35.0,
+        "max_value": 75.0,
+        "compare_field": null
+      }
+    ],
+    "formula": "Current price <= 0.50 * High price all time AND Market Capitalization > 5000",
+    "sort": {
+      "field": "analysis_score",
+      "direction": "desc"
+    },
+    "limit": 20,
+    "created_at": "2026-05-15T18:45:14.209935",
+    "updated_at": "2026-05-15T18:45:14.209935"
+  }
+]

@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+*.cover
+
+# Virtual Environments
+backend/.venv/
+venv/
+env/
+ENV/
+
+# Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# Project specific
+backend/logs/
+backend/data/candles/
+backend/data/market_snapshots/
+
+# OS files
+.AppleDouble
+.LSOverride
+*.log
