@@ -1,188 +1,122 @@
-# Angel One Market Analysis Workspace
+# Angel One Market Dashboard
 
-Analysis-only market workspace built on Angel One SmartAPI historical data and market feeds. It does not place orders, submit trades, or expose trade execution workflows.
-
-## 📚 Documentation
-
-**New to the app?** Start here:
-
-| Guide | Purpose |
-|-------|---------|
-| [**USER_GUIDE.md**](USER_GUIDE.md) | Complete step-by-step walkthrough of the dashboard |
-| [**SENSEX_AND_INDICES.md**](SENSEX_AND_INDICES.md) | How to find missing index tokens (SENSEX, NIFTY METAL, etc.) |
-| [**MCP_INTEGRATION.md**](MCP_INTEGRATION.md) | Using the backend as an AI agent server |
-| [**Design.md**](Design.md) | Technical architecture and SmartAPI API usage |
-| [**AIAPPROACH.md**](AIAPPROACH.md) | First-principles AI recommendation design |
-| [**Working.md**](Working.md) | Current implementation status and flows |
+Personal finance tracking, trade ideas, and market performance dashboard built on Angel One SmartAPI. Analysis-only -- does not place orders.
 
 ---
 
-## Authentication model
-
-The app follows the official SmartAPI session flow:
-
-1. `loginByPassword` with `clientcode`, `password` / PIN, `totp`, and optional `state`
-2. Receive `jwtToken`, `refreshToken`, and `feedToken`
-3. Optionally call `generateTokens` to refresh and `getProfile` to inspect the user
-4. Use those tokens only for read-only analysis in this app
-
 ## Features
 
-- ✅ Official SmartAPI login bootstrap
-- ✅ Token refresh and profile fetch
-- ✅ Historical candle analysis through Angel One SmartAPI
-- ✅ Formula-driven screeners with smart diagnostics
-- ✅ Saved screener library (JSON-based)
-- ✅ Recommendation scoring with explanations
-- ✅ Market tracker (daily to yearly performance deltas)
-- ✅ Instrument master search and sync
-- ✅ Mutual fund NAV tracking
-- ✅ News market feed integration
-- ✅ MCP-ready backend for AI agent integration
+| Feature | Source | Status |
+|---------|--------|--------|
+| SmartAPI Login + Token Refresh | SmartAPI Auth | Done |
+| Historical Candle Analysis | SmartAPI Historical | Done |
+| Formula-Driven Screeners | Local Engine | Done |
+| Saved Screener Library | Local JSON | Done |
+| Market Tracker (Daily to Yearly) | SmartAPI Historical | Done |
+| Instrument Master Search | SmartAPI Scrip Master | Done |
+| Mutual Fund NAV Tracking | External (mfapi.in) | Done |
+| News Feed | Google News RSS | Done |
+| Dark / Light Mode | Frontend CSS | Done |
+| MCP Backend for AI Agents | FastAPI | Done |
+| Portfolio Holdings + P&L | SmartAPI Holdings | Planned |
+| Market Quote (Real-Time) | SmartAPI Quote | Planned |
+| Top Gainers / Losers | SmartAPI Market Data | Planned |
+| Put-Call Ratio (Sentiment) | SmartAPI Market Data | Planned |
+| WebSocket Live Feed | SmartAPI WebSocket 2.0 | Planned |
+
+---
+
+## UI Tabs
+
+| Tab | Purpose |
+|-----|---------|
+| **Dashboard** | Today's market snapshot -- index cards, top movers, sentiment |
+| **Tracker** | Weekly/monthly/yearly performance, news, mutual funds |
+| **Screener** | Formula-based stock discovery, saved filters |
+| **Portfolio** | Holdings, positions, trade book, period P&L |
+| **AI Agent** | MCP integration, natural language queries |
+
+---
 
 ## Quick Start
 
-### For Users
-
-1. **Read** [USER_GUIDE.md](USER_GUIDE.md) (15 minutes)
-2. **Login** with SmartAPI credentials
-3. **Run analysis** on a preset (e.g., NIFTY 50)
-4. **Save screeners** for reuse
-
-### For Developers
-
-#### Backend setup
+### Backend
 
 ```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+cp .env.example .env   # Add your SmartAPI credentials
 uvicorn app.main:app --reload --port 8000
 ```
 
-**Features**:
-- FastAPI server on port 8000
-- SmartAPI client integration
-- Formula engine for complex screeners
-- Local JSON storage for screeners, candles, snapshots
-- CORS-enabled for frontend
-
-#### Frontend setup
+### Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev   # http://localhost:5173
 ```
-
-**Features**:
-- React + TypeScript dashboard
-- Form-based screener builder
-- Real-time analysis results
-- Saved screener management
-- Market tracker visualizations
-
-### For AI Agents
-
-See [MCP_INTEGRATION.md](MCP_INTEGRATION.md) for:
-- MCP protocol setup
-- AI agent system prompts (copy-paste ready)
-- Example interactions
-- Tool & resource definitions
 
 ---
 
-## Watchlist Row Format
+## Documentation
+
+All docs live in `docs/`:
+
+| Document | Content |
+|----------|---------|
+| [SmartAPI Features](docs/SMARTAPI_FEATURES.md) | All usable SmartAPI endpoints + portfolio design |
+| [UI Redesign](docs/UI_REDESIGN.md) | Tab architecture, component structure, dark mode |
+| [Design](docs/Design.md) | Technical architecture, API map, rate limits |
+| [Working](docs/Working.md) | Current implementation status and flows |
+| [User Guide](docs/USER_GUIDE.md) | Step-by-step dashboard walkthrough |
+| [AI Approach](docs/AIAPPROACH.md) | AI recommendation engine design |
+| [MCP Integration](docs/MCP_INTEGRATION.md) | AI agent server setup |
+| [Indices Guide](docs/SENSEX_AND_INDICES.md) | Finding missing index tokens |
+| [Docker Setup](docs/DOCKER_SETUP.md) | Container deployment |
+
+---
+
+## Architecture
+
+```
+frontend/          React + TypeScript + Vite
+  src/App.tsx      Single-page dashboard (being split into tabs)
+  src/styles.css   CSS variables with dark/light mode
+
+backend/           Python FastAPI
+  app/main.py      API routes
+  app/screener.py  Formula engine + indicator calculations
+  app/tracker.py   Market snapshot + period deltas
+  app/smartapi_client.py  SmartAPI wrapper with rate limiting
+  data/            Local JSON storage (screeners, snapshots, cache)
+
+docs/              All documentation
+```
+
+---
+
+## Watchlist Format
 
 ```
 EXCHANGE|TRADING_SYMBOL|SYMBOL_TOKEN|DISPLAY_NAME|SECTOR|MARKET_CAP
 ```
 
-**Example**:
+Example:
 ```
 NSE|RELIANCE-EQ|2885|Reliance Industries|Energy|1945000
 NSE|NIFTY50|99926000|NIFTY 50|Index|0
-NSE|NIFTYPHARMA|<token>|NIFTY PHARMA|Sector Index|0
 ```
 
-**Notes**:
-- `SYMBOL_TOKEN` is numeric (or `<token>` placeholder if not resolved)
-- `MARKET_CAP` is optional but required for "Market Capitalization" filters
-- Use [SENSEX_AND_INDICES.md](SENSEX_AND_INDICES.md) to resolve `<token>` placeholders
-
 ---
 
-## Key Concepts
+## What This App Does NOT Do
 
-### Screeners
-Pre-defined filters and formulas that you save and reuse. Example: "50% Off High Cap" finds large-cap stocks trading below half their all-time high.
+- Place, modify, or cancel orders
+- Execute trades or GTT orders
+- Automate any trading strategy
+- Access margin or fund transfer APIs
+- Expose order/trade execution to AI agents
 
-### Filters
-AND-logic conditions on technical metrics:
-- `rsi_14 > 60` (momentum)
-- `market_cap >= 5000` (size)
-- `volume > 1.5 * 20_day_average` (activity)
-
-### Formulas
-Optional complex logic combining multiple conditions:
-```
-Current price <= 0.50 * High price all time AND Market Capitalization > 5000
-```
-
-### Market Tracker
-Shows performance across multiple timeframes (daily, weekly, monthly, quarterly, 6-month, 1-year) for your current watchlist.
-
-### Analysis Score
-Composite 0-10 rating based on:
-- Technical momentum (trend, RSI, moving averages)
-- Valuation (distance from all-time high/low)
-- Size (market cap preference)
-- Volume (activity level)
-
----
-
-## Troubleshooting
-
-### No results from screener?
-→ See [USER_GUIDE.md → Running Analysis section](USER_GUIDE.md#step-7-running-analysis-universal-query)
-
-### Indices showing `<token>` placeholder?
-→ See [SENSEX_AND_INDICES.md](SENSEX_AND_INDICES.md)
-
-### Login fails?
-→ See [USER_GUIDE.md → Step 1: Login](USER_GUIDE.md#step-1-login-with-smartapi-credentials)
-
-### What data is available?
-→ See [Design.md → SmartAPI Documentation Map](Design.md#smartapi-documentation-map)
-
----
-
-## Technical Notes
-
-- SmartAPI header metadata is exposed in the UI because Angel One expects local IP, public IP, and MAC address on auth requests.
-- No buy/sell/order routes are used by this app.
-- Sessions expire around midnight; daily login required.
-- Historical candles are cached locally to avoid rate limits.
-- The backend exposes `/api/mcp-capabilities` for AI agent integration.
-
----
-
-## Next Steps
-
-1. **Try a screener** → Run "50% Off High Cap" preset
-2. **Save your own** → Create "My Watchlist" screener
-3. **Use Market Tracker** → See yearly performance trends
-4. **Explore AI integration** → Read [MCP_INTEGRATION.md](MCP_INTEGRATION.md)
-5. **Build formulas** → See [AIAPPROACH.md → Natural-Language Screener Builder](AIAPPROACH.md#5-natural-language-screener-builder)
-
----
-
-## Support
-
-For issues or questions:
-- Check the relevant guide (USER_GUIDE.md, SENSEX_AND_INDICES.md, etc.)
-- Review backend logs: `backend/logs/`
-- Inspect cached data: `backend/data/`
-- Check SmartAPI status: https://smartapi.angelbroking.com/docs
+It is strictly a read-only analysis and tracking tool.
