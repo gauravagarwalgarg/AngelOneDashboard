@@ -1,0 +1,59 @@
+site_name: Angel One Market Analysis Dashboard
+site_description: Analysis-only market research tool for Indian equities using SmartAPI
+repo_url: https://github.com/your-username/angel-dashboard
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.expand
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - minify
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed
+  - pymdownx.arithmatex
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+
+nav:
+  - Home: index.md
+  - User Guides:
+    - User Guide: user-guide.md
+    - Getting Missing Tokens: sensex-and-indices.md
+    - Docker Setup: docker-setup.md
+  - Technical:
+    - Design & Architecture: design.md
+    - Implementation Status: working.md
+    - AI Approach: aiapproach.md
+    - MCP Integration: mcp-integration.md
+
+copyright: 'Copyright &copy; 2026. Analysis-only market research tool for Indian equities.'
