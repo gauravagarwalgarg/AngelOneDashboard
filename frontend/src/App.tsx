@@ -1,5 +1,22 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+function useTheme() {
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('dashboard-theme');
+    if (stored === 'dark' || stored === 'light') return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('dashboard-theme', theme);
+  }, [theme]);
+
+  const toggle = () => setThemeState(t => t === 'dark' ? 'light' : 'dark');
+  return { theme, toggle };
+}
+
 type Field = { key: string; label: string; description: string; category: string };
 type FilterRule = { field: string; operator: string; value?: number; min_value?: number; max_value?: number };
 type SortRule = { field: string; direction: "asc" | "desc" };
@@ -53,6 +70,7 @@ const presets: IndexPreset[] = [
 ];
 
 function App() {
+  const { theme, toggle: toggleTheme } = useTheme();
   const [analysisInfo, setAnalysisInfo] = useState<AnalysisInfo | null>(null);
   const [fieldsResponse, setFieldsResponse] = useState<FieldsResponse>({ fields: [], operators: [], trigger_targets: [], formula_aliases: {} });
   const [mcpHint, setMcpHint] = useState<MCPHint | null>(null);
@@ -386,7 +404,12 @@ function App() {
     return (
       <div className="app-shell auth-shell">
         <section className="auth-page panel focus-panel">
-          <p className="eyebrow">Angel One Analysis Lab</p>
+          <div className="auth-header">
+            <p className="eyebrow">Angel One Analysis Lab</p>
+            <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+          </div>
           <h1>Authenticate first</h1>
           <p className="hero-copy">This page only handles SmartAPI login. Once authenticated, you enter the separate analysis dashboard.</p>
           {analysisInfo ? <p className="note-banner">{analysisInfo.authentication_note}</p> : null}
@@ -422,6 +445,9 @@ function App() {
           <p className="hero-copy">Authentication is complete. Use this dashboard for index analysis, saved screeners, and filter-based stock discovery.</p>
         </div>
         <div className="row-actions">
+          <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <button type="button" className="secondary-button" onClick={refreshSession} disabled={authLoading}>Refresh tokens</button>
           <button type="button" className="secondary-button" onClick={loadProfile} disabled={authLoading}>Profile</button>
           <button type="button" className="ghost-button" onClick={logout}>Back to auth</button>

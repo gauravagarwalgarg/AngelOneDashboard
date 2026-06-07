@@ -10,7 +10,7 @@ This document explains how to use the Angel One Market Analysis backend as an MC
 - Your backend exposes analysis tools (screeners, formulas, instrument search)
 - AI agents can call these tools through the MCP server
 - Agents can explain results, refine queries, and suggest screeners
-- **No trading permissions are exposed** — only read-only analysis
+- **No trading permissions are exposed** only read-only analysis
 
 ---
 
