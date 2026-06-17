@@ -1,62 +1,44 @@
 version: '3.8'
 
-services:
-  dev:
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
-    container_name: angel-dashboard-dev
-    volumes:
-      - .:/workspace
-      - /workspace/frontend/node_modules
-      - /workspace/backend/.venv
-    ports:
-      - "8000:8000"   # Backend API
-      - "5173:5173"   # Frontend Dev Server
-    environment:
-      - PYTHONUNBUFFERED=1
-      - NODE_ENV=development
-    networks:
-      - angel-network
-    command: /bin/bash
+# Local development: runs both backend and frontend with hot-reload
+# Usage: docker-compose up --build
 
+services:
   backend:
     build:
       context: .
-      target: runtime
+      dockerfile: docker/Dockerfile.backend
     container_name: angel-backend
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend:/app/backend
-      - ./backend/data:/app/data
-      - ./backend/logs:/app/logs
-    ports:
-      - "8001:8000"
+      - ./backend/data:/app/backend/data
     environment:
       - PYTHONUNBUFFERED=1
-    networks:
-      - angel-network
-    depends_on:
-      - dev
-    profiles:
-      - production
+      - SMART_SCREENER_CORS_ORIGINS=["http://localhost:5173"]
+    working_dir: /app/backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   frontend:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
     container_name: angel-frontend
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
-      - "5174:5173"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
     environment:
       - NODE_ENV=development
-    networks:
-      - angel-network
-    command: npm run dev
-    profiles:
-      - development
-
-networks:
-  angel-network:
-    driver: bridge
+    working_dir: /app/frontend
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      backend:
+        condition: service_healthy
