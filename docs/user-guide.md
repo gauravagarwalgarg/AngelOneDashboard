@@ -1,214 +1,235 @@
-# Angel One Market Analysis - Complete User Guide
+# User Guide
 
-Last updated: May 16, 2026
+Complete walkthrough of every tab and feature.
 
-## Quick Overview
+## Login
 
-This is an **analysis-only dashboard** for Indian equities and indices. It:
-- ✅ Retrieves market data, analyzes trends, builds screeners
-- ✅ Saves your filters and watchlists for reuse
-- ✅ Compares performance across daily, weekly, monthly, quarterly, and yearly timeframes
-- ❌ Does **not** place trades or execute orders
+1. Open `http://localhost:5173`
+2. Enter your Angel One SmartAPI credentials:
+   - **API Key**: From SmartAPI portal (create a "Historical Data API" app)
+   - **Client Code**: Your Angel One client code
+   - **PIN/Password**: Your trading PIN
+   - **TOTP**: Time-based OTP from your authenticator app
+3. Click **Enter Dashboard**
 
-**What you can do:**
-1. Load different indices/stocks (NIFTY, SENSEX, sector indices, individual stocks)
-2. Create custom filters and formulas to find matching instruments
-3. Track daily/weekly/monthly/yearly performance changes
-4. Compare instruments against benchmarks
-5. Save screener templates for later use
+!!! note "Session Duration"
+    SmartAPI sessions expire at midnight IST. You'll need to login fresh each day.
 
----
-
-## Getting Started: Step-by-Step
-
-### Step 1: Login with SmartAPI Credentials
-
-**WHERE**: Top-left panel (Auth section)
-
-**WHAT YOU NEED**:
-- API Key (from Angel One portal)
-- Client Code (your account identifier)
-- Password or PIN
-- TOTP (6-digit code from your authenticator app)
-- State (defaults to `analysis-lab` - leave as-is)
-
-**HOW IT WORKS**:
-1. Fill in all required fields
-2. Click "Login" button
-3. Backend validates with SmartAPI
-4. You receive JWT token, refresh token, and feed token
-5. Dashboard unlocks and shows your profile
-
-**WHY THIS MATTERS**:
-- SmartAPI sessions expire around midnight
-- You need to log in fresh daily
-- All data fetches use your credentials
-- No trading permissions are requested or used
-
-**If login fails**:
-- Re-check your TOTP (must be fresh)
-- Confirm API key is for "Historical Data API" enabled in your portal
-- Ensure your SmartAPI app has the correct portal static IP registered
+!!! warning "Static IP"
+    Your SmartAPI app must have your public IP whitelisted in the portal settings.
 
 ---
 
-### Step 2: Understand the Left Panel (Universe Setup)
+## Tab 1: Summary (📊)
 
-**WHERE**: Left side of dashboard after login
+**Purpose**: Quick market snapshot  what happened today?
 
-**WHAT'S THERE**:
+### What it shows
+- Market tracker table with all your watchlist indices/stocks
+- Period performance: daily, weekly, fortnightly, monthly, quarterly, 6M, 1Y deltas
+- Snapshot comparison: today vs previous run
 
-#### A. Watchlist/Universe Text Area
-```
-exchange|trading_symbol|symbol_token|display_name|sector|market_cap
-```
+### How to use
+1. Click **Refresh Tracker** button
+2. Wait 10-30 seconds (fetches candles from SmartAPI with rate limiting)
+3. Table populates with percentage changes across all time windows
+4. Green = up, Red = down
 
-**Example rows:**
-```
-NSE|NIFTY50|99926000|NIFTY 50|Index|0
-NSE|NIFTYBANK|99926009|NIFTY BANK|Sector Index|0
-NSE|RELIANCE-EQ|2885|Reliance|Energy|1945000
-```
+### Snapshot Comparison
+Each time you refresh, a snapshot is saved to `backend/data/market_snapshots/YYYY-MM-DD.json`. When you refresh again (same day or next day), the "Snapshot Delta" column shows how much the price moved since your last run.
 
-**What each column means:**
-- `exchange`: NSE (National Stock Exchange) or BSE (Bombay Stock Exchange)
-- `trading_symbol`: Official trading code (e.g., RELIANCE-EQ, INFY)
-- `symbol_token`: SmartAPI numeric token (used for API calls)
-- `display_name`: Human-readable label
-- `sector`: Category (Energy, IT, Pharma, etc.)
-- `market_cap`: Market capitalization in crores (optional, needed for "Market Cap" filters)
-
-**How to populate it:**
-1. **Quick way**: Click one of the index presets (see below)
-2. **Custom way**: Manually paste or type rows
-3. **Smart way**: Use "Sync Instruments" → "Search" to find tokens
-
-#### B. Index Presets (Quick-Add Buttons)
-Click these to instantly add entire indices:
-
-| Preset | Contains | Token Status |
-|--------|----------|--------------|
-| **NIFTY 50** | 50 large-cap stocks | ✅ Token ready |
-| **SENSEX** | BSE top 30 stocks | ⚠️ **Token needed** |
-| **NIFTY NEXT 50** | Stocks 51-100 by cap | ⚠️ Token needed |
-| **NIFTY BANK** | 12 bank stocks | ✅ Token ready |
-| **NIFTY FINANCIAL** | Insurance, fintech, etc. | ✅ Token ready |
-| **NIFTY IT** | TCS, Infosys, Wipro, etc. | ✅ Token ready |
-| **NIFTY PHARMA** | Pharma companies | ✅ Token ready |
-| **NIFTY FMCG** | Staples & consumer | ✅ Token ready |
-| **NIFTY AUTO** | Auto companies | ✅ Token ready |
-| **NIFTY METAL** | Metal sector | ⚠️ Token needed |
-| **NIFTY ENERGY** | Oil, gas, power | ⚠️ Token needed |
-| **NIFTY REALTY** | Real estate | ⚠️ Token needed |
-
-**Why some show `<token>`**:
-These placeholders need to be resolved using the Instrument Master. See "Getting Missing Tokens" below.
-
-#### C. Benchmark Selection
-```
-Benchmark: NSE|NIFTY50|99926000|NIFTY 50|Index|0
-```
-
-**What it does**: When you run analysis, results are compared against this benchmark's performance. This helps you see which instruments are **outperforming** vs **underperforming**.
-
-**How to change it**: Paste a different instrument row or use the presets.
+**Use case**: Run the tracker at market open and market close. The snapshot delta shows intraday change.
 
 ---
 
-### Step 3: Getting Missing Tokens (Resolve `<token>`)
+## Tab 2: Mutual Funds (💰)
 
-**WHERE**: "Sync Instruments" section (middle-left area)
+**Purpose**: Track NAV performance of your mutual fund portfolio.
 
-**PROBLEM YOU'RE SEEING**:
-```
-NSE|NIFTYENERGY|<token>|NIFTY ENERGY|Sector Index|0
-```
+### What it shows
+- Fund name, latest NAV, NAV date
+- 1-month, 3-month, 6-month, 1-year returns
+- AI-style recommendation (based on return momentum)
 
-The `<token>` is a placeholder because SmartAPI needs a numeric ID for API calls.
+### How to use
+1. Click **Load Funds**
+2. Data loads from mfapi.in (no SmartAPI auth needed)
+3. Pre-configured tracked funds:
+   - HDFC Index Fund Nifty 50 Direct Growth
+   - HDFC Flexi Cap Fund Direct Growth
+   - Parag Parikh Flexi Cap Fund Direct Growth
+   - HDFC Small Cap Fund Direct Growth
+   - HDFC Mid-Cap Opportunities Fund Direct Growth
 
-**HOW TO RESOLVE IT**:
-
-1. **Click "Sync Instruments"** button
-   - Backend downloads Angel One's master instrument list
-   - Takes ~10-30 seconds
-   - You'll see a status message
-
-2. **Use the Search Form** (appears after sync):
-   - **Search for**: Type `NIFTY ENERGY`, `SENSEX`, etc.
-   - **Exchange**: Leave as "NSE" for indices (use "BSE" for SENSEX)
-   - **Click Search**
-   - Results show matching instruments with their tokens
-
-3. **Copy the token** from results:
-   ```
-   NIFTY ENERGY | NSE | 99926019 | NIFTY ENERGY | Index
-   ```
-
-4. **Update your watchlist** row:
-   ```
-   NSE|NIFTYENERGY|99926019|NIFTY ENERGY|Sector Index|0
-   ```
-
-**Why this is needed**:
-- SmartAPI uses numeric tokens to fetch data
-- Index names alone aren't enough
-- The master list has ~7000+ instruments
-- App caches it locally to avoid repeated downloads
+### Customizing tracked funds
+Edit `backend/app/mutual_funds.py` to add/remove fund scheme codes.
 
 ---
 
-### Step 4: Understanding Filters (Middle Section)
+## Tab 3: News (📰)
 
-**WHERE**: Below the watchlist text area
+**Purpose**: Indian stock market headlines.
 
-**WHAT FILTERS DO**: They act like an AND-logic gate. Instruments must match **all** filters to appear in results.
+### What it shows
+- Headlines from Google News RSS
+- Source, publication date, and link
 
-#### Common Filter Examples:
+### How to use
+1. Click **Load News**
+2. Fetches latest headlines for "Indian stock market OR Nifty OR Sensex"
+3. Click any headline to open the source article
 
-| Filter | Means | Use Case |
-|--------|-------|----------|
-| `analysis_score >= 8` | Strong technical signal | Find high-conviction ideas |
-| `rsi_14 between 35 and 75` | Not oversold/overbought | Avoid extremes |
-| `volume > 20_day_avg` | Trading actively | Better liquidity |
-| `current_price <= 0.50 * High price all time` | Trading at deep discount | Value hunting |
-| `market_cap > 5000` | Large cap only | Conservative |
-| `market_cap between 500 and 5000` | Mid cap | Growth |
-
-**How to add a filter**:
-1. Click "Add Filter" button
-2. Select a field (e.g., `rsi_14`)
-3. Select an operator (e.g., `between`)
-4. Enter the value(s)
-
-**If no results show up**:
-- Filters might be too strict (e.g., `rsi_14 > 90` returns nothing)
-- Solution: Loosen the filters OR check if your watchlist has valid tokens
-- Error message will tell you which symbols failed
+No auth required.
 
 ---
 
-### Step 5: Understanding Formulas (Optional Advanced)
+## Tab 4: Instruments (🔍)
 
-**WHERE**: Text area labeled "Formula (optional)"
+**Purpose**: Find stock/index tokens for your watchlist.
 
-**WHAT IT DOES**: An optional alternative to filters. Lets you write math expressions.
+### What it shows
+- Scrip master status (total instruments cached)
+- Search by symbol, name, or token
+- Pre-built index presets
 
-**Example**:
-```
-Current price <= 0.50 * High price all time AND Market Capitalization > 5000
-```
+### How to use
+1. **Sync Master**  Downloads Angel One's full instrument list (~90k instruments)
+2. **Search**  Type "RELIANCE" or "NIFTY" to find the exact token
+3. **Add to Watchlist**  Click to add an instrument to your screener watchlist
+4. **Set as Benchmark**  Set an index as your comparison benchmark
+
+### Index Presets
+Pre-configured buttons for common indices (NIFTY 50, BANK NIFTY, etc.). Click to add to watchlist instantly.
 
 ---
 
-## Docs: Preview & Deploy
+## Tab 5: Stock Screener (⚙️)
 
-This project includes a GitHub Actions workflow that builds the MkDocs site and deploys it to GitHub Pages on pushes to `main`.
+**Purpose**: Formula-based stock discovery  the core analysis tool.
 
-Local preview:
-
-```bash
-pip install mkdocs mkdocs-material pymdown-extensions
-mkdocs serve
+### Watchlist
+Symbols in pipe-delimited format:
+```
+EXCHANGE|TRADING_SYMBOL|SYMBOL_TOKEN|DISPLAY_NAME|SECTOR|MARKET_CAP
 ```
 
-Push workflow triggers when `docs/` or `mkdocs.yml` change. See `.github/workflows/deploy-docs.yml` for details.
+Use the Instruments tab to find valid tokens.
+
+### Structured Filters
+Click **Add Filter** to create conditions:
+- Field: `rsi_14`, `change_pct`, `volume_vs_avg_20`, `analysis_score`, etc.
+- Operator: `gt`, `gte`, `lt`, `lte`, `eq`, `between`
+- Value: numeric threshold
+
+**Example**: `rsi_14 between 30 - 70` (stocks not overbought/oversold)
+
+### Formula (Optional)
+Free-text expression combining fields with AND/OR logic:
+```
+current_price > sma_50 AND rsi_14 < 70 AND volume_vs_avg_20 > 1.5
+```
+
+Leave empty to use only structured filters.
+
+### Available Fields
+
+| Field | What it measures |
+|-------|-----------------|
+| `current_price` | Latest closing price |
+| `change_pct` | Day change % |
+| `rsi_14` | 14-period RSI (30=oversold, 70=overbought) |
+| `sma_20` / `sma_50` | Simple moving averages |
+| `ema_20` / `ema_50` | Exponential moving averages |
+| `volume_vs_avg_20` | Today's volume vs 20-day average (>2 = unusual) |
+| `price_vs_sma_20_pct` | Distance from SMA20 (positive = above) |
+| `all_time_high` | Highest price in history |
+| `distance_from_all_time_high_pct` | How far below the high (-50 = half off) |
+| `analysis_score` | Composite recommendation score |
+| `trend_score` | Technical momentum composite |
+| `market_cap` | Market cap (from watchlist metadata) |
+
+### Saving Screeners
+- Name your screener and click **Save**
+- Load saved screeners from the Instruments tab
+- Screeners persist in `backend/data/screeners.json`
+
+### Troubleshooting: No Results
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "Formula eliminated ALL symbols" | Formula too restrictive | Clear formula field, use only structured filters |
+| "Skipped N rows with missing tokens" | `<token>` placeholders | Use Instruments tab to find real tokens |
+| "Not enough candles" | New listing or wrong token | Verify token in scrip master |
+| "Invalid Token" (AG8001) | Session expired or wrong API key | Re-login with fresh TOTP |
+
+---
+
+## Tab 6: Snapshots (📈)
+
+**Purpose**: Compare market performance over time.
+
+### What it shows
+- All saved daily snapshots with timestamps
+- Period deltas showing how each index moved
+- Run-to-run comparison
+
+### How snapshots work
+1. Every "Refresh Tracker" run saves a snapshot to disk
+2. Next time you run, the previous snapshot's closing prices are loaded
+3. The "Snapshot Delta" shows the difference between runs
+
+**Best practice**: Run the tracker once daily after market close. Over weeks, you build a local database of market movements.
+
+---
+
+## Tab 7: AI Predictions (🤖)
+
+**Purpose**: AI-powered market analysis *(planned feature)*.
+
+### Current State
+- Shows MCP capability hints (what tools an AI agent could call)
+- Lists available resources and tools
+
+### Planned Features
+- Natural language → screener formula conversion
+- Scan result explanation ("why did these stocks match?")
+- News sentiment classification (bullish/bearish/neutral)
+- Sector rotation detection
+- Anomaly alerts (unusual volume + price divergence)
+
+---
+
+## Why Run Locally? Why Not Deploy?
+
+| Reason | Explanation |
+|--------|-------------|
+| **SmartAPI requires daily TOTP** | Can't automate login  needs human interaction |
+| **IP whitelisting** | SmartAPI apps are locked to your IP |
+| **Session expires at midnight** | No persistent background service possible |
+| **Sensitive credentials** | API keys + TOTP should never leave your machine |
+| **No trading risk** | Running locally = zero attack surface |
+| **Free** | No hosting costs, no subscription |
+| **Data ownership** | All snapshots are yours, on your disk |
+
+### How AI Can Help (Even Locally)
+
+1. **Post-scan explanation**  After running a screener, send results to an LLM to get "Here's why NIFTY PHARMA is showing strength: RSI recovering from oversold, above SMA50, volume expanding"
+2. **Morning briefing**  Run tracker → pipe output to AI → get a 3-paragraph market summary
+3. **Natural language screener**  Type "large caps that fell 30% from their high" → AI generates the formula
+4. **News attribution**  News headlines + price data → AI says "HDFC BANK up 2% likely due to RBI policy news"
+
+All of this works locally with an OpenAI API key  no deployment needed.
+
+---
+
+## Daily Workflow (Recommended)
+
+```
+9:30 AM   Login with fresh TOTP
+9:31 AM   Refresh Tracker (captures market open snapshot)
+3:30 PM   Refresh Tracker again (captures market close)
+3:31 PM   Run Stock Screener with your filters
+3:32 PM   Check Mutual Funds performance
+3:33 PM   Load News for context
+Evening   Compare snapshots, review AI suggestions
+```

@@ -272,4 +272,4 @@ POST /api/portfolio/performance  - Holdings + period deltas (computed)
 
 ---
 
-*Cross-references: [Design](./Design.md) | [UI Redesign](./UI_REDESIGN.md) | [Working](./Working.md) | [MCP Integration](./MCP_INTEGRATION.md)*
+*Cross-references: [Design](./design.md) | [Working](./working.md) | [MCP Integration](./mcp-integration.md)*

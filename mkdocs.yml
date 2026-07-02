@@ -14,14 +14,14 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
+      primary: deep purple
       accent: amber
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
+      primary: deep purple
       accent: amber
       toggle:
         icon: material/weather-night
@@ -37,12 +37,14 @@ theme:
     - navigation.top
     - navigation.instant
     - navigation.tracking
+    - navigation.indexes
     - search.suggest
     - search.highlight
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
     - toc.follow
+    - toc.integrate
 
 extra:
   social:
@@ -84,15 +86,17 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-      - User Guide: USER_GUIDE.md
-      - Docker Setup: DOCKER_SETUP.md
+      - User Guide: user-guide.md
+      - Docker Setup: docker-setup.md
   - Architecture:
       - System Design: architecture.md
+      - API Design: design.md
+      - How It Works: working.md
       - SmartAPI Features: SMARTAPI_FEATURES.md
       - Requirements & Evolution: requirements.md
   - Features:
-      - Stock Screener: features.md
-      - Indices & Tokens: SENSEX_AND_INDICES.md
-      - MCP Integration: MCP_INTEGRATION.md
+      - Stock Screener & Dashboard: features.md
+      - Indices & Tokens: sensex-and-indices.md
+      - MCP Integration: mcp-integration.md
   - AI:
-      - AI Approach: AIAPPROACH.md
+      - AI Approach: aiapproach.md

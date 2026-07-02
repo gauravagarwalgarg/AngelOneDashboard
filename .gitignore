@@ -54,6 +54,7 @@ Thumbs.db
 backend/logs/
 backend/data/candles/
 backend/data/market_snapshots/
+site/
 
 # OS files
 .AppleDouble
