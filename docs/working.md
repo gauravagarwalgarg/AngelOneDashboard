@@ -17,12 +17,12 @@ The app helps with:
 ## Runtime Shape
 
 ```mermaid
-flowchart TD
+graph TD
   User["User logs in daily"] --> UI["React UI"]
-  UI --> Auth["/api/auth/login"]
-  UI --> Scan["/api/scan"]
-  UI --> Tracker["/api/market-tracker"]
-  UI --> Saved["/api/screeners"]
+  UI --> Auth["POST /api/auth/login"]
+  UI --> Scan["POST /api/scan"]
+  UI --> Tracker["GET /api/market-tracker"]
+  UI --> Saved["GET /api/screeners"]
   Auth --> SmartAuth["SmartAPI auth endpoints"]
   Scan --> Historical["SmartAPI historical candles"]
   Tracker --> Historical
@@ -79,27 +79,13 @@ The default watchlist contains known SmartAPI index tokens:
 - NIFTY FMCG
 - NIFTY AUTO
 
-Index templates are quick-add watchlist shortcuts, not guaranteed live SmartAPI tokens. Rows with `<token>` are intentionally not submitted to SmartAPI. They require instrument master lookup first.
-
-If historical requests return `AG8001 Invalid Token`, treat it as an auth/API-key problem before debugging index symbols:
-
-- Re-login with a fresh TOTP.
-- Confirm the API key is for a Historical Data API or Market Data enabled SmartAPI app.
-- Confirm the portal static IP matches the public IP sent in request headers.
-- Confirm the same API key was used for login and historical requests.
-
 ## Instrument Master Flow
 
 The instrument master fixes the placeholder-token gap for stocks, indices, ETFs, and F&O contracts.
 
 1. User clicks `Sync master`.
 2. Backend downloads Angel One's public `OpenAPIScripMaster.json`.
-3. Backend normalizes and stores the data at:
-
-```text
-backend/data/instruments/scrip_master.json
-```
-
+3. Backend normalizes and stores the data at: `backend/data/instruments/scrip_master.json`
 4. User searches by symbol, name, token, or instrument type.
 5. UI can add a selected instrument to the watchlist or set it as benchmark.
 
@@ -109,30 +95,6 @@ Current endpoints:
 - `POST /api/instruments/sync`
 - `GET /api/instruments/search`
 - `GET /api/instruments/indices`
-
-## Mutual Fund Flow
-
-SmartAPI does not provide mutual fund research data. The app uses an external NAV adapter for tracked funds:
-
-- HDFC Index Fund Nifty 50 Direct Growth
-- HDFC Flexi Cap Fund Direct Growth
-- Parag Parikh Flexi Cap Fund Direct Growth
-- HDFC Small Cap Fund Direct Growth
-- HDFC Mid-Cap Opportunities Fund Direct Growth
-
-Current endpoint:
-
-- `GET /api/mutual-funds/tracked`
-
-The table ranks the tracked funds by 1-month NAV return and also shows 3-month, 6-month, and 1-year returns.
-
-## News Flow
-
-SmartAPI does not provide a news API. The app uses Google News RSS for Indian market opportunity headlines.
-
-Current endpoint:
-
-- `GET /api/news/market`
 
 ## Screener Flow
 
@@ -166,15 +128,11 @@ Formula examples:
 Current price <= 0.50 * High price all time AND Market Capitalization > 5000
 ```
 
-Saved screeners are stored at:
-
-```text
-backend/data/screeners.json
-```
+Saved screeners are stored at: `backend/data/screeners.json`
 
 ## Market Tracker Flow
 
-The tracker answers: “How did my index/stock universe behave across daily to yearly windows?”
+The tracker answers: "How did my index/stock universe behave across daily to yearly windows?"
 
 1. User clicks `Refresh tracker`.
 2. UI sends current watchlist symbols to `/api/market-tracker`.
@@ -192,57 +150,4 @@ The tracker answers: “How did my index/stock universe behave across daily to y
 | 1 year | 252 trading sessions |
 
 5. Backend compares current price to the latest previous local snapshot.
-6. Backend writes today’s snapshot to:
-
-```text
-backend/data/market_snapshots/YYYY-MM-DD.json
-```
-
-7. UI displays a table with daily, weekly, fortnightly, monthly, quarterly, 6M, 1Y, and snapshot deltas.
-
-## SmartAPI Rate Handling
-
-The SmartAPI historical path can return non-JSON rate-limit responses. The backend currently:
-
-- Throttles historical requests.
-- Retries rate-limit-like failures.
-- Caches candle responses locally.
-- Skips bad symbols instead of failing the whole scan.
-- Returns warnings to the UI.
-
-Known improvement:
-
-- Add a centralized endpoint-aware request governor.
-- Use Market Data quote batching for today’s LTP/OHLC.
-- Use historical candles only for time-window deltas.
-
-## Local Storage
-
-Current local JSON storage:
-
-| Data | Path |
-| --- | --- |
-| Saved screeners | `backend/data/screeners.json` |
-| Candle cache | `backend/data/candles` |
-| Daily market snapshots | `backend/data/market_snapshots` |
-
-This keeps the app usable for repeated comparisons without hitting SmartAPI on every view refresh.
-
-## Current Gaps
-
-- Market quote batching is not implemented yet.
-- Mutual fund data is not available from SmartAPI; a basic external NAV adapter is implemented, but AUM, holdings, expense ratio, and category rank still need a richer provider.
-- Fundamentals are not available from SmartAPI and need an external source.
-- News is not available from SmartAPI; Google News RSS is implemented for headlines, but source-level relevance scoring is still pending.
-- Some sector/index tokens are still placeholders until scrip master lookup exists.
-- The AI/MCP layer is described but not implemented as an MCP server yet.
-
-## Recommended Next Implementation Order
-
-1. Market Data quote batching for present-day values.
-2. Add period deltas to screener output, not just tracker output.
-3. External fundamentals adapter.
-4. External mutual fund adapter.
-5. External news adapter.
-6. AI explanation and anomaly modules.
-7. Optional WebSocket alerting for live event triggers.
+6. Backend writes today's snapshot to: `backend/data/market_snapshots/YYYY-MM-DD.json`

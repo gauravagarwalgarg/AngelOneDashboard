@@ -245,14 +245,24 @@ def _analyze_no_match_diagnostics(
         matches = [m for m in metrics if matches_filter(m, rule)]
         elimination_pct = 100 * (1 - len(matches) / len(metrics)) if metrics else 0
         if len(matches) == 0:
-            diagnostics.append(
-                f"🔴 Filter #{i+1} ({rule.field} {rule.operator} {rule.value or f'{rule.min_value}-{rule.max_value}'}) "
-                f"eliminated ALL symbols. Try loosening this constraint."
-            )
+            # Show actual metric range so user knows what values exist
+            try:
+                values = [float(getattr(m, rule.field, 0)) for m in metrics]
+                min_val = round(min(values), 2) if values else 0
+                max_val = round(max(values), 2) if values else 0
+                diagnostics.append(
+                    f"Filter #{i+1} ({rule.field} {rule.operator} {rule.value or f'{rule.min_value}-{rule.max_value}'}) "
+                    f"eliminated ALL symbols. Actual range in your universe: {min_val} to {max_val}."
+                )
+            except Exception:
+                diagnostics.append(
+                    f"Filter #{i+1} ({rule.field} {rule.operator} {rule.value or f'{rule.min_value}-{rule.max_value}'}) "
+                    f"eliminated ALL symbols. Try loosening this constraint."
+                )
         elif elimination_pct > 80:
             diagnostics.append(
-                f"⚠️  Filter #{i+1} ({rule.field}) is very restrictive, eliminating {elimination_pct:.0f}% of symbols. "
-                f"Consider relaxing it or removing it."
+                f"Filter #{i+1} ({rule.field}) is very restrictive, eliminating {elimination_pct:.0f}% of symbols. "
+                f"Consider relaxing it."
             )
 
     # Check formula
@@ -261,24 +271,25 @@ def _analyze_no_match_diagnostics(
             matches = [m for m in metrics if evaluate_formula(m, formula)]
             elimination_pct = 100 * (1 - len(matches) / len(metrics)) if metrics else 0
             if len(matches) == 0:
-                diagnostics.append(f"🔴 Formula eliminated ALL symbols. Check your formula syntax or try simpler conditions.")
+                # Try to explain why the formula fails
+                sample = metrics[0] if metrics else None
+                hint = ""
+                if sample:
+                    norm_formula = formula.lower()
+                    if "high price all time" in norm_formula or "all_time_high" in norm_formula:
+                        distance = round(sample.distance_from_all_time_high_pct, 1)
+                        hint = f" Your stocks are only ~{abs(distance)}% below their fetched ATH, not 50%+."
+                diagnostics.append(
+                    f"Formula eliminated ALL symbols.{hint} "
+                    f"Try removing the formula or using a less restrictive condition."
+                )
             elif elimination_pct > 80:
-                diagnostics.append(f"⚠️  Formula is very restrictive, eliminating {elimination_pct:.0f}% of symbols.")
+                diagnostics.append(f"Formula is very restrictive, eliminating {elimination_pct:.0f}% of symbols.")
         except Exception as e:
-            diagnostics.append(f"⚠️  Formula syntax issue: {str(e)}")
+            diagnostics.append(f"Formula syntax issue: {str(e)}")
 
-    # Provide recommendations
     if not diagnostics:
         diagnostics.append("No matches found, but filters look reasonable. Try a different watchlist or benchmark.")
-    else:
-        # Add suggestions
-        sample_looser_suggestions = [
-            "Try loosening numeric thresholds (e.g., rsi_14 > 70 → rsi_14 > 60)",
-            "Check if your watchlist has valid tokens (no <token> placeholders)",
-            "Expand your watchlist to include more instruments",
-            "Run Market Tracker first to see current price ranges",
-        ]
-        diagnostics.append("\n💡 Suggestions: " + " OR ".join(sample_looser_suggestions[:2]))
 
     return diagnostics
 

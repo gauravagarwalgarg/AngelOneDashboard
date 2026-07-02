@@ -4,7 +4,7 @@ Last updated: 2026-05-12
 
 ## First Principles
 
-The app should not ask AI to “predict stocks” directly. That is too unconstrained and too easy to overfit. The better design is to make AI operate on explicit market facts, transparent calculations, and auditable assumptions.
+The app should not ask AI to "predict stocks" directly. That is too unconstrained and too easy to overfit. The better design is to make AI operate on explicit market facts, transparent calculations, and auditable assumptions.
 
 Core principles:
 
@@ -38,11 +38,11 @@ AI should work over layered data:
    - Snapshot deltas.
 
 3. Interpretive data:
-   - “Sector leading market.”
-   - “Stock diverging from sector.”
-   - “Volume expansion without price confirmation.”
-   - “Index breadth weakening.”
-   - “Move possibly news-linked.”
+   - "Sector leading market."
+   - "Stock diverging from sector."
+   - "Volume expansion without price confirmation."
+   - "Index breadth weakening."
+   - "Move possibly news-linked."
 
 AI should only operate on layer 3 after layers 1 and 2 are computed by code.
 
@@ -174,43 +174,9 @@ AI output:
 
 AI must produce a structured plan that the backend validates before execution.
 
-### 6. Portfolio-Free Watchlist Assistant
-
-This app should not need holdings or order APIs. AI can still help with a watchlist:
-
-- Cluster watchlist by sector.
-- Find correlated names.
-- Detect duplicated exposure.
-- Identify underperformers versus sector index.
-- Explain which saved screeners match each stock.
-
-### 7. Mutual Fund Screener Assistant
-
-SmartAPI is not enough for mutual funds. With external MF data, AI can:
-
-- Compare fund rolling returns.
-- Detect category drift.
-- Explain expense ratio and tracking error.
-- Compare fund holdings against stock/sector screeners.
-- Identify overlap between funds.
-
-AI should not rank funds without explicit criteria and data provenance.
-
 ## Model Architecture
 
 Recommended architecture:
-
-```mermaid
-flowchart TD
-  Data["Raw data stores"] --> Compute["Deterministic computation"]
-  Compute --> Features["Feature table"]
-  Features --> Rules["Screener/rules engine"]
-  Features --> AIContext["AI context builder"]
-  Rules --> Results["Matched results"]
-  Results --> AIContext
-  AIContext --> LLM["AI explanation / ranking / query parser"]
-  LLM --> Output["Auditable insight"]
-```
 
 The LLM should not call SmartAPI directly in the first version. It should call backend tools that enforce:
 
@@ -219,133 +185,3 @@ The LLM should not call SmartAPI directly in the first version. It should call b
 - Cache use.
 - No trading endpoints.
 - Data schema validation.
-
-## Candidate AI Tools
-
-### Explain Scan
-
-Input:
-
-- Scan response.
-- Formula.
-- Field catalog.
-
-Output:
-
-- Summary of matched results.
-- Why top results matched.
-- Common factor across results.
-- Risks and missing data.
-
-### Explain Market Day
-
-Input:
-
-- Market tracker response.
-- Previous snapshot.
-- Optional news.
-
-Output:
-
-- Top leading/lagging indices.
-- Short-term vs long-term divergence.
-- Broad market tone.
-- Possible anomalies.
-
-### Build Screener
-
-Input:
-
-- Natural-language condition.
-- Available field catalog.
-
-Output:
-
-- Validated formula.
-- Structured filters.
-- Missing fields.
-- Plain-English explanation.
-
-### Improve Screener
-
-Input:
-
-- Saved screener.
-- Historical result count.
-- False positives marked by user.
-
-Output:
-
-- Suggested threshold changes.
-- Additional filters.
-- Warnings about overfitting.
-
-### Data Gap Detector
-
-Input:
-
-- Requested analysis.
-- Available fields.
-
-Output:
-
-- What data is missing.
-- Whether SmartAPI can provide it.
-- External provider category needed.
-
-## Guardrails
-
-The AI layer must:
-
-- Never place or suggest placing orders through the app.
-- Never claim certainty about future returns.
-- Show data timestamps.
-- Mark stale or cached data clearly.
-- Separate facts, calculations, and interpretations.
-- Refuse to infer fundamentals when no fundamental source is connected.
-- Refuse to attribute moves to news when no news source is connected.
-- Keep recommendation wording analysis-oriented: “watchlist,” “review,” “candidate,” not “buy now.”
-
-## Evaluation
-
-AI quality should be evaluated on:
-
-- Faithfulness to input data.
-- Correct formula generation.
-- No hallucinated metrics.
-- Clear uncertainty.
-- Useful prioritization.
-- Reproducibility from saved inputs.
-
-Test cases:
-
-- User asks for a metric not available.
-- SmartAPI returns partial data.
-- Sector index token is missing.
-- News is absent but user asks “why did it move?”
-- A formula is ambiguous.
-- Cached data is stale.
-
-## Implementation Plan
-
-1. Add a backend feature table endpoint that returns normalized computed metrics.
-2. Add an AI context builder that strips secrets and includes only analysis data.
-3. Add natural-language screener generation with backend validation.
-4. Add scan explanation.
-5. Add market-day explanation.
-6. Add news/fundamental adapters before enabling attribution-heavy answers.
-7. Expose safe read-only MCP tools:
-   - `list_saved_screeners`
-   - `get_field_catalog`
-   - `run_screener`
-   - `run_market_tracker`
-   - `explain_scan`
-   - `build_screener_formula`
-
-## Non-Goals
-
-- No autonomous trading.
-- No order placement.
-- No portfolio rebalancing automation.
-- No unaudited predictions.
-- No AI-only recommendations without deterministic evidence.
