@@ -1,6 +1,7 @@
 # Angel One Market Dashboard
 
-Personal finance tracking, trade ideas, and market performance dashboard built on Angel One SmartAPI. Analysis-only  does not place orders.
+Personal finance tracking, trade ideas, and market performance dashboard built on Angel One SmartAPI, Google News Feed, MF Central API. 
+Note: Analysis-only  does not place orders.
 
 ## Features
 
