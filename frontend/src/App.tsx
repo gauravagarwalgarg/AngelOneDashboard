@@ -97,8 +97,8 @@ function App() {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [screenerId, setScreenerId] = useState<string>(crypto.randomUUID());
-  const [screenerName, setScreenerName] = useState("50% Off High Cap Scan");
-  const [screenerDescription, setScreenerDescription] = useState("Current price at or below half of fetched all-time high with large market cap.");
+  const [screenerName, setScreenerName] = useState("Large Cap Momentum");
+  const [screenerDescription, setScreenerDescription] = useState("Large-cap stocks with positive technical momentum.");
   const [watchlistText, setWatchlistText] = useState(starterUniverse);
   const [benchmarkText, setBenchmarkText] = useState(defaultBenchmark);
   const [formula, setFormula] = useState("");
@@ -286,6 +286,7 @@ function App() {
   function addFilter() { setFilters((current) => [...current, { field: "analysis_score", operator: "gte", value: 0 }]); }
   function updateFilter(index: number, patch: Partial<FilterRule>) { setFilters((current) => current.map((rule, ruleIndex) => (ruleIndex === index ? { ...rule, ...patch } : rule))); }
   function removeFilter(index: number) { setFilters((current) => current.filter((_, ruleIndex) => ruleIndex !== index)); }
+  function clearFilters() { setFilters([]); setFormula(""); setMessage("Cleared all filters and formula."); }
   function updateSessionHeader(key: keyof SessionHeaders, value: string) { setSessionHeaders((current) => ({ ...current, [key]: value })); }
   function addPreset(row: string) {
     if (row.includes("<token>")) { setMessage("This preset needs a symbol token from the Angel One scrip master before it can be scanned."); return; }
@@ -391,7 +392,7 @@ function App() {
             watchlistText={watchlistText} setWatchlistText={setWatchlistText}
             benchmarkText={benchmarkText} setBenchmarkText={setBenchmarkText}
             formula={formula} setFormula={setFormula}
-            filters={filters} addFilter={addFilter} updateFilter={updateFilter} removeFilter={removeFilter}
+            filters={filters} addFilter={addFilter} updateFilter={updateFilter} removeFilter={removeFilter} clearFilters={clearFilters}
             sortField={sortField} setSortField={setSortField}
             sortDirection={sortDirection} setSortDirection={setSortDirection}
             limit={limit} setLimit={setLimit}
@@ -642,14 +643,14 @@ function ScreenerTab({
 
 function FiltersTab({
   watchlistText, setWatchlistText, benchmarkText, setBenchmarkText, formula, setFormula,
-  filters, addFilter, updateFilter, removeFilter, sortField, setSortField, sortDirection, setSortDirection,
+  filters, addFilter, updateFilter, removeFilter, clearFilters, sortField, setSortField, sortDirection, setSortDirection,
   limit, setLimit, fieldsResponse, loading, runScan, scan, columns,
   screenerName, setScreenerName, screenerDescription, setScreenerDescription, saveCurrentScreener,
 }: {
   watchlistText: string; setWatchlistText: (v: string) => void;
   benchmarkText: string; setBenchmarkText: (v: string) => void;
   formula: string; setFormula: (v: string) => void;
-  filters: FilterRule[]; addFilter: () => void; updateFilter: (i: number, p: Partial<FilterRule>) => void; removeFilter: (i: number) => void;
+  filters: FilterRule[]; addFilter: () => void; updateFilter: (i: number, p: Partial<FilterRule>) => void; removeFilter: (i: number) => void; clearFilters: () => void;
   sortField: string; setSortField: (v: string) => void;
   sortDirection: "asc" | "desc"; setSortDirection: (v: "asc" | "desc") => void;
   limit: number; setLimit: (v: number) => void;
@@ -676,7 +677,7 @@ function FiltersTab({
         <label>Formula<textarea rows={3} value={formula} onChange={(e) => setFormula(e.target.value)} /></label>
         <div className="formula-help"><strong>Formula aliases</strong><div className="alias-list">{Object.entries(fieldsResponse.formula_aliases).map(([label, key]) => <span key={label}>{label} → {key}</span>)}</div></div>
 
-        <div className="section-head with-action"><div><h3>Structured Filters</h3></div><button type="button" className="secondary-button" onClick={addFilter}>Add filter</button></div>
+        <div className="section-head with-action"><div><h3>Structured Filters</h3></div><div className="row-actions"><button type="button" className="ghost-button" onClick={clearFilters}>Clear all</button><button type="button" className="secondary-button" onClick={addFilter}>Add filter</button></div></div>
         {filters.map((rule, index) => (
           <div className="filter-row" key={`filter-${index}`}>
             <select value={rule.field} onChange={(e) => updateFilter(index, { field: e.target.value })}>{fieldsResponse.fields.map((field) => <option key={field.key} value={field.key}>{field.label}</option>)}</select>
@@ -701,7 +702,21 @@ function FiltersTab({
       {/* Results */}
       <article className="panel">
         <div className="section-head"><div><h2>Results</h2><p>Read-only signal table from the latest scan.</p></div></div>
-        {scan?.warnings?.length ? <p className="note-banner">{scan.warnings.slice(0, 3).join(" ")}</p> : null}
+        {scan && scan.matched_symbols === 0 && scan.total_symbols > 0 && (
+          <div className="error-banner" style={{ marginBottom: 12 }}>
+            <strong>0 matches from {scan.total_symbols} symbols.</strong> Your filters or formula eliminated all results.
+            {scan.warnings?.length ? (
+              <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
+                {scan.warnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            ) : null}
+            <p style={{ marginTop: 8, marginBottom: 0 }}>
+              <strong>Tip:</strong> Try removing the formula or loosening filters. For large-cap stocks near their highs, a formula like
+              "Current price &lt;= 0.50 * High price all time" will match nothing because these stocks are typically within 10-30% of ATH, not 50% below.
+            </p>
+          </div>
+        )}
+        {scan?.warnings?.length && scan.matched_symbols > 0 ? <p className="note-banner">{scan.warnings.slice(0, 3).join(" ")}</p> : null}
         <div className="table-wrap">
           <table>
             <thead><tr>{columns.map((col) => <th key={col}>{col}</th>)}</tr></thead>
