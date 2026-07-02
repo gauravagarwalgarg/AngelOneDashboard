@@ -1,0 +1,102 @@
+site_name: Angel One Market Dashboard
+site_description: Personal finance tracking and market analysis built on Angel One SmartAPI
+site_author: Gaurav Agarwal
+site_url: https://gauravagarwalgarg.github.io/AngelOneDashboard
+
+repo_url: https://github.com/GauravAgarwalGarg/AngelOneDashboard
+repo_name: GauravAgarwalGarg/AngelOneDashboard
+
+theme:
+  name: material
+  icon:
+    logo: material/chart-line
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - navigation.tracking
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+    - toc.integrate
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/GauravAgarwalGarg/AngelOneDashboard
+  generator: false
+
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.mark
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - User Guide: user-guide.md
+      - Docker Setup: docker-setup.md
+  - Architecture:
+      - System Design: architecture.md
+      - API Design: design.md
+      - How It Works: working.md
+      - SmartAPI Features: SMARTAPI_FEATURES.md
+      - Requirements & Evolution: requirements.md
+  - Features:
+      - Stock Screener & Dashboard: features.md
+      - Indices & Tokens: sensex-and-indices.md
+      - MCP Integration: mcp-integration.md
+  - AI:
+      - AI Approach: aiapproach.md

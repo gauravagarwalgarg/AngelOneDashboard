@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    container_name: angel-dashboard-dev
+    volumes:
+      - ..:/workspace
+      - /workspace/frontend/node_modules
+      - /workspace/backend/.venv
+    ports:
+      - "8000:8000"   # Backend API
+      - "5173:5173"   # Frontend Dev Server
+      - "5678:5678"   # Python Debugger
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_ENV=development
+      - PYTHONPATH=/workspace/backend
+    networks:
+      - angel-network
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+networks:
+  angel-network:
+    driver: bridge
