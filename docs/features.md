@@ -2,6 +2,20 @@
 
 The core analysis tool  formula-based stock discovery with 25+ technical indicators.
 
+## Dashboard Layout
+
+The app uses a **7-tab interface** after authentication:
+
+| Tab | Purpose |
+|-----|---------|
+| **Summary** | Index cards, top gainers/losers, scan stats |
+| **Mutual Funds** | NAV returns (1M, 3M, 6M, 1Y) for tracked funds |
+| **News** | Google News RSS market headlines |
+| **Instruments** | Scrip master search, index presets, saved screeners |
+| **Stock Screener** | Formula + filters + results (the core analysis tool) |
+| **Snapshots** | Historical comparison (daily → 1Y deltas) |
+| **AI Predictions** | Momentum scoring, trade signals, predictions |
+
 ## How It Works
 
 ```
@@ -184,3 +198,41 @@ NSE|HDFCBANK-EQ|1333|HDFC Bank|Banking|1200000
 ```
 
 Find tokens using the **Instruments** tab → search → add to watchlist.
+
+---
+
+## Troubleshooting: 0 Matched Symbols
+
+If your scan returns 0 results, the most common causes are:
+
+### 1. Formula is too restrictive
+
+The formula `Current price <= 0.50 * High price all time` requires stocks to be trading at **half their all-time high**. Most large-caps (RELIANCE, HDFCBANK, INFY) are within 10-30% of ATH  they will never match this.
+
+**Fix**: Remove the formula or use a less restrictive one:
+```
+current_price < sma_50 AND rsi_14 < 40
+```
+
+### 2. Filter + formula contradiction
+
+A filter like `analysis_score >= 8` combined with a deep-value formula creates a contradiction:
+- Deep value = stock is down a lot = negative momentum = low analysis_score
+- High analysis_score = positive momentum = stock near highs
+
+**Fix**: Use one or the other, not both.
+
+### 3. Watchlist has placeholder tokens
+
+Rows with `<token>` are skipped. Use the Instruments tab to sync the scrip master and find real tokens.
+
+### 4. Quick diagnostic
+
+When 0 results are returned, the app shows a **red banner** with:
+- Which filter eliminated all results
+- The actual value range in your universe
+- Specific suggestions to fix
+
+### 5. Start with no filters
+
+Use the **"Clear all"** button to remove all filters and formula, run the scan to see raw results, then add filters one at a time to understand which one eliminates your stocks.

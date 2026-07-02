@@ -1,8 +1,20 @@
 # Angel One SmartAPI Analysis Design
 
-Last reviewed: 2026-05-12
+Last reviewed: 2026-07-02
 
 This app is an analysis-only market research tool. It must not place, modify, cancel, or automate orders. SmartAPI is used for authenticated market data, historical candles, live feed capability, and derivative analytics where useful.
+
+## UI Structure (Implemented)
+
+The dashboard uses a 7-tab layout:
+
+1. **Summary**  Index cards + top gainers/losers + scan stats
+2. **Mutual Funds**  NAV returns for tracked funds (external API)
+3. **News**  Google News RSS market headlines
+4. **Instruments**  Scrip master search + saved screeners
+5. **Stock Screener**  Formula-based analysis with structured filters
+6. **Snapshots**  Historical comparison across daily to yearly windows
+7. **AI Predictions**  Momentum scoring + trade signal generation
 
 ## SmartAPI Documentation Map
 
